@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Gestão</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-blur-circle dashboard-blur-circle-1"></div>
+    <div class="dashboard-blur-circle dashboard-blur-circle-2"></div>
+    <div class="dashboard-blur-circle dashboard-blur-circle-3"></div>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">📊</div>
+                <h2>Dashboard</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-section="vendas">
+                    <span class="nav-icon">💰</span>
+                    <span class="nav-text">Vendas</span>
+                </button>
+                <button class="nav-item" data-section="clientes">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">Clientes</span>
+                </button>
+                <button class="nav-item" data-section="estoque">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text">Estoque</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="index.html" class="logout-btn">
+                    <span>🚪</span>
+                    <span>Sair</span>
+                </a>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div class="header-content">
+                    <h1 id="section-title">Vendas</h1>
+                    <p id="section-subtitle">Acompanhe suas métricas em tempo real</p>
+                </div>
+                <div class="header-actions">
+                    <button class="action-btn" id="notifications-btn" onclick="toggleNotifications()">
+                        <span>🔔</span>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <button class="action-btn" id="settings-btn" onclick="toggleSettings()">
+                        <span>⚙️</span>
+                    </button>
+                </div>
+            </header>
+            <div class="stats-grid" id="stats-container">
+            </div>
+            <div class="sql-editor-container" id="sql-editor-container" style="display: none;">
+                <div class="sql-editor-header">
+                    <h3>📝 Editor de Consultas SQL</h3>
+                    <button class="close-sql-editor" onclick="closeSQLEditor()">✕</button>
+                </div>
+                <div class="sql-editor-content">
+                    <div class="query-tabs">
+                        <button class="query-tab active" data-query="vendas">Vendas</button>
+                        <button class="query-tab" data-query="clientes">Clientes</button>
+                        <button class="query-tab" data-query="estoque">Estoque</button>
+                    </div>
+                    <div class="query-editor">
+                        <label class="query-label">Query SQL:</label>
+                        <textarea id="sql-query-input" class="sql-textarea" placeholder="SELECT * FROM vendas WHERE data >= DATE_SUB(NOW(), INTERVAL 30 DAY)">-- Exemplo: Vendas dos últimos 30 dias
+SELECT 
+    DATE_FORMAT(data_venda, '%Y-%m') as mes,
+    SUM(valor_total) as total_vendas
+FROM vendas
+WHERE data_venda >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+GROUP BY DATE_FORMAT(data_venda, '%Y-%m')
+ORDER BY mes;</textarea>
+                    </div>
+                    <div class="query-actions">
+                        <button class="query-btn secondary" onclick="clearQuery()">
+                            🗑️ Limpar
+                        </button>
+                        <button class="query-btn secondary" onclick="loadSampleQuery()">
+                            📋 Query de Exemplo
+                        </button>
+                        <button class="query-btn primary" onclick="executeQuery()">
+                            ▶️ Executar Query
+                        </button>
+                    </div>
+                    <div class="query-result" id="query-result">
+                        <div class="result-placeholder">
+                            <span class="result-icon">💡</span>
+                            <p>Execute uma query para ver os resultados aqui</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="charts-section" id="charts-container">
+            </div>
+        </main>
+        <div class="panel-overlay" id="notifications-overlay" onclick="closeNotifications()"></div>
+        <div class="notifications-panel" id="notifications-panel">
+            <div class="panel-header">
+                <h3>Notificações</h3>
+                <button class="panel-close-btn" onclick="closeNotifications()">✕</button>
+            </div>
+            <div class="panel-content">
+                <div class="notification-item unread">
+                    <div class="notification-icon">📊</div>
+                    <div class="notification-content">
+                        <h4>Relatório de Vendas</h4>
+                        <p>Novo relatório mensal disponível para visualização</p>
+                        <span class="notification-time">Há 5 minutos</span>
+                    </div>
+                </div>
+                <div class="notification-item unread">
+                    <div class="notification-icon">⚠️</div>
+                    <div class="notification-content">
+                        <h4>Estoque Baixo</h4>
+                        <p>23 produtos estão com estoque abaixo do mínimo</p>
+                        <span class="notification-time">Há 1 hora</span>
+                    </div>
+                </div>
+                <div class="notification-item unread">
+                    <div class="notification-icon">👥</div>
+                    <div class="notification-content">
+                        <h4>Novos Clientes</h4>
+                        <p>15 novos clientes cadastrados hoje</p>
+                        <span class="notification-time">Há 2 horas</span>
+                    </div>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-icon">💰</div>
+                    <div class="notification-content">
+                        <h4>Meta Atingida</h4>
+                        <p>Parabéns! Meta de vendas do mês foi alcançada</p>
+                        <span class="notification-time">Ontem</span>
+                    </div>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-icon">🔔</div>
+                    <div class="notification-content">
+                        <h4>Atualização do Sistema</h4>
+                        <p>Nova versão disponível com melhorias</p>
+                        <span class="notification-time">2 dias atrás</span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-footer">
+                <button class="panel-action-btn" onclick="markAllAsRead()">Marcar todas como lidas</button>
+            </div>
+        </div>
+        <div class="panel-overlay" id="settings-overlay" onclick="closeSettings()"></div>
+        <div class="settings-panel" id="settings-panel">
+            <div class="panel-header">
+                <h3>Configurações</h3>
+                <button class="panel-close-btn" onclick="closeSettings()">✕</button>
+            </div>
+            <div class="panel-content">
+                <div class="settings-section">
+                    <h4>Aparência</h4>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Tema Escuro</span>
+                            <span class="setting-description">Ativar modo escuro</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="dark-mode-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Animações</span>
+                            <span class="setting-description">Habilitar animações da interface</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="animations-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h4>Notificações</h4>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Notificações Push</span>
+                            <span class="setting-description">Receber notificações em tempo real</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="push-notifications-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">E-mail</span>
+                            <span class="setting-description">Receber relatórios por e-mail</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="email-notifications-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Som</span>
+                            <span class="setting-description">Tocar som nas notificações</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="sound-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h4>Dados e Privacidade</h4>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Atualização Automática</span>
+                            <span class="setting-description">Atualizar dados automaticamente</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="auto-refresh-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-label">Compartilhar Analytics</span>
+                            <span class="setting-description">Ajudar a melhorar o sistema</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="analytics-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h4>Conexão com Banco de Dados</h4>
+                    <div class="setting-item full-width">
+                        <label class="input-label">Host do Servidor SQL</label>
+                        <input type="text" id="sql-host" class="settings-input" placeholder="localhost" value="localhost">
+                    </div>
+                    <div class="setting-item full-width">
+                        <label class="input-label">Porta</label>
+                        <input type="text" id="sql-port" class="settings-input" placeholder="3306" value="3306">
+                    </div>
+                    <div class="setting-item full-width">
+                        <label class="input-label">Nome do Banco</label>
+                        <input type="text" id="sql-database" class="settings-input" placeholder="sistema_gestao" value="sistema_gestao">
+                    </div>
+                    <div class="setting-item full-width">
+                        <label class="input-label">Usuário</label>
+                        <input type="text" id="sql-user" class="settings-input" placeholder="root" value="root">
+                    </div>
+                    <div class="setting-item full-width">
+                        <label class="input-label">Senha</label>
+                        <input type="password" id="sql-password" class="settings-input" placeholder="••••••••">
+                    </div>
+                    <button class="test-connection-btn" onclick="testSQLConnection()">
+                        <span id="test-connection-text">Testar Conexão</span>
+                    </button>
+                    <div id="connection-status" class="connection-status"></div>
+                </div>
+
+                <div class="settings-section">
+                    <h4>Consultas SQL Personalizadas</h4>
+                    <div class="setting-item full-width">
+                        <label class="input-label">
+                            Ativar Modo SQL
+                            <span class="sql-mode-badge">Avançado</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="sql-mode-toggle" onchange="toggleSQLMode()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-footer">
+                <button class="panel-action-btn secondary" onclick="closeSettings()">Cancelar</button>
+                <button class="panel-action-btn" onclick="saveSettings()">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sectionsData = {
+            vendas: {
+                title: 'Vendas',
+                subtitle: 'Acompanhe suas métricas de vendas em tempo real',
+                stats: [
+                    { label: 'Vendas Hoje', value: 'R$ 12.450', change: '+12%', icon: '💵' },
+                    { label: 'Vendas Mês', value: 'R$ 284.300', change: '+8%', icon: '📈' },
+                    { label: 'Ticket Médio', value: 'R$ 385', change: '+5%', icon: '🎯' },
+                    { label: 'Total Pedidos', value: '738', change: '+15%', icon: '🛒' }
+                ],
+                charts: [
+                    {
+                        id: 'vendasMensais',
+                        title: 'Vendas Mensais',
+                        type: 'bar',
+                        data: {
+                            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                            datasets: [{
+                                label: 'Vendas (R$ mil)',
+                                data: [245, 198, 287, 312, 265, 298, 334, 289, 356, 378, 312, 284],
+                                backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                                borderColor: 'rgba(102, 126, 234, 1)',
+                                borderWidth: 2,
+                                borderRadius: 8
+                            }]
+                        }
+                    },
+                    {
+                        id: 'tendenciaVendas',
+                        title: 'Tendência de Vendas (Últimos 30 dias)',
+                        type: 'line',
+                        data: {
+                            labels: Array.from({length: 30}, (_, i) => i + 1),
+                            datasets: [{
+                                label: 'Vendas Diárias',
+                                data: [8.5, 9.2, 7.8, 10.5, 11.2, 9.8, 8.9, 12.1, 11.5, 10.8, 9.5, 11.8, 13.2, 12.5, 11.9, 10.2, 9.8, 11.5, 12.8, 13.5, 12.2, 11.8, 10.5, 12.9, 14.2, 13.8, 12.5, 11.2, 12.4, 12.8],
+                                borderColor: 'rgba(147, 51, 234, 1)',
+                                backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                                tension: 0.4,
+                                fill: true,
+                                borderWidth: 3
+                            }]
+                        }
+                    }
+                ]
+            },
+            clientes: {
+                title: 'Clientes',
+                subtitle: 'Gerencie e acompanhe sua base de clientes',
+                stats: [
+                    { label: 'Total Clientes', value: '2.847', change: '+18%', icon: '👤' },
+                    { label: 'Novos (Mês)', value: '342', change: '+22%', icon: '✨' },
+                    { label: 'Ativos', value: '1.923', change: '+5%', icon: '✅' },
+                    { label: 'Taxa Retenção', value: '87%', change: '+3%', icon: '🎯' }
+                ],
+                charts: [
+                    {
+                        id: 'distribuicaoClientes',
+                        title: 'Distribuição de Clientes por Categoria',
+                        type: 'pie',
+                        data: {
+                            labels: ['Premium', 'Regular', 'Básico', 'Novos'],
+                            datasets: [{
+                                data: [425, 1245, 835, 342],
+                                backgroundColor: [
+                                    'rgba(102, 126, 234, 0.8)',
+                                    'rgba(147, 51, 234, 0.8)',
+                                    'rgba(168, 85, 247, 0.8)',
+                                    'rgba(79, 172, 254, 0.8)'
+                                ],
+                                borderColor: [
+                                    'rgba(102, 126, 234, 1)',
+                                    'rgba(147, 51, 234, 1)',
+                                    'rgba(168, 85, 247, 1)',
+                                    'rgba(79, 172, 254, 1)'
+                                ],
+                                borderWidth: 2
+                            }]
+                        }
+                    },
+                    {
+                        id: 'crescimentoClientes',
+                        title: 'Crescimento de Clientes',
+                        type: 'bar',
+                        data: {
+                            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                            datasets: [{
+                                label: 'Novos Clientes',
+                                data: [185, 198, 245, 287, 265, 312, 298, 334, 356, 378, 342, 342],
+                                backgroundColor: 'rgba(79, 172, 254, 0.8)',
+                                borderColor: 'rgba(79, 172, 254, 1)',
+                                borderWidth: 2,
+                                borderRadius: 8
+                            }]
+                        }
+                    }
+                ]
+            },
+            estoque: {
+                title: 'Estoque',
+                subtitle: 'Controle seu inventário e produtos',
+                stats: [
+                    { label: 'Total Produtos', value: '1.245', change: '+6%', icon: '📦' },
+                    { label: 'Baixo Estoque', value: '23', change: '-15%', icon: '⚠️' },
+                    { label: 'Valor Total', value: 'R$ 892K', change: '+12%', icon: '💎' },
+                    { label: 'Categorias', value: '18', change: '0%', icon: '🏷️' }
+                ],
+                charts: [
+                    {
+                        id: 'nivelEstoque',
+                        title: 'Nível de Estoque (Últimos 30 dias)',
+                        type: 'line',
+                        data: {
+                            labels: Array.from({length: 30}, (_, i) => i + 1),
+                            datasets: [{
+                                label: 'Produtos em Estoque',
+                                data: [1245, 1238, 1242, 1235, 1228, 1232, 1240, 1238, 1245, 1250, 1248, 1242, 1238, 1245, 1252, 1248, 1245, 1240, 1235, 1238, 1242, 1248, 1245, 1240, 1238, 1242, 1245, 1248, 1245, 1245],
+                                borderColor: 'rgba(168, 85, 247, 1)',
+                                backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                                tension: 0.4,
+                                fill: true,
+                                borderWidth: 3
+                            }]
+                        }
+                    },
+                    {
+                        id: 'categoriasEstoque',
+                        title: 'Produtos por Categoria',
+                        type: 'bar',
+                        data: {
+                            labels: ['Eletrônicos', 'Roupas', 'Alimentos', 'Livros', 'Brinquedos', 'Móveis', 'Esportes', 'Beleza'],
+                            datasets: [{
+                                label: 'Quantidade',
+                                data: [245, 312, 198, 156, 134, 89, 67, 44],
+                                backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                                borderColor: 'rgba(102, 126, 234, 1)',
+                                borderWidth: 2,
+                                borderRadius: 8
+                            }]
+                        }
+                    }
+                ]
+            }
+        };
+
+        let currentCharts = [];
+        function renderStats(stats) {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = stats.map(stat => `
+                <div class="stat-card">
+                    <div class="stat-icon">${stat.icon}</div>
+                    <div class="stat-content">
+                        <p class="stat-label">${stat.label}</p>
+                        <h3 class="stat-value">${stat.value}</h3>
+                        <span class="stat-change ${stat.change.startsWith('+') ? 'positive' : 'negative'}">
+                            ${stat.change}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        function renderCharts(charts) {
+            currentCharts.forEach(chart => chart.destroy());
+            currentCharts = [];
+
+            const container = document.getElementById('charts-container');
+            container.innerHTML = charts.map(chart => `
+                <div class="chart-card">
+                    <h3 class="chart-title">${chart.title}</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="${chart.id}"></canvas>
+                    </div>
+                </div>
+            `).join('');
+            charts.forEach(chartConfig => {
+                const ctx = document.getElementById(chartConfig.id).getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: chartConfig.type,
+                    data: chartConfig.data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: chartConfig.type === 'pie',
+                                position: 'bottom',
+                                labels: {
+                                    color: 'rgba(255, 255, 255, 0.9)',
+                                    font: {
+                                        family: 'Poppins',
+                                        size: 12
+                                    },
+                                    padding: 15
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                borderColor: 'rgba(255, 255, 255, 0.2)',
+                                borderWidth: 1,
+                                padding: 12,
+                                displayColors: true,
+                                titleFont: {
+                                    family: 'Poppins',
+                                    size: 13
+                                },
+                                bodyFont: {
+                                    family: 'Poppins',
+                                    size: 12
+                                }
+                            }
+                        },
+                        scales: chartConfig.type !== 'pie' ? {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)',
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    font: {
+                                        family: 'Poppins',
+                                        size: 11
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.05)',
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    font: {
+                                        family: 'Poppins',
+                                        size: 11
+                                    }
+                                }
+                            }
+                        } : {}
+                    }
+                });
+                currentCharts.push(chart);
+            });
+        }
+        function switchSection(sectionName) {
+            const section = sectionsData[sectionName];
+            
+            document.getElementById('section-title').textContent = section.title;
+            document.getElementById('section-subtitle').textContent = section.subtitle;
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.section === sectionName) {
+                    item.classList.add('active');
+                }
+            });
+            
+            renderStats(section.stats);
+            renderCharts(section.charts);
+        }
+        function toggleNotifications() {
+            const panel = document.getElementById('notifications-panel');
+            const overlay = document.getElementById('notifications-overlay');
+            const settingsPanel = document.getElementById('settings-panel');
+            const settingsOverlay = document.getElementById('settings-overlay');
+            
+            settingsPanel.classList.remove('active');
+            settingsOverlay.classList.remove('active');
+            
+            panel.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function closeNotifications() {
+            const panel = document.getElementById('notifications-panel');
+            const overlay = document.getElementById('notifications-overlay');
+            panel.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        function markAllAsRead() {
+            document.querySelectorAll('.notification-item.unread').forEach(item => {
+                item.classList.remove('unread');
+            });
+            document.querySelector('.notification-badge').style.display = 'none';
+        }
+
+        // SQL Mode functions
+        let sqlModeEnabled = false;
+        let currentSQLQuery = '';
+        let sqlConnection = null;
+
+        function toggleSQLMode() {
+            sqlModeEnabled = document.getElementById('sql-mode-toggle').checked;
+            const sqlEditor = document.getElementById('sql-editor-container');
+            
+            if (sqlModeEnabled) {
+                sqlEditor.style.display = 'block';
+                sqlEditor.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                sqlEditor.style.display = 'none';
+            }
+        }
+
+        function closeSQLEditor() {
+            document.getElementById('sql-mode-toggle').checked = false;
+            toggleSQLMode();
+        }
+
+        function testSQLConnection() {
+            const btn = document.querySelector('.test-connection-btn');
+            const statusDiv = document.getElementById('connection-status');
+            const textSpan = document.getElementById('test-connection-text');
+            
+            const host = document.getElementById('sql-host').value;
+            const port = document.getElementById('sql-port').value;
+            const database = document.getElementById('sql-database').value;
+            const user = document.getElementById('sql-user').value;
+            const password = document.getElementById('sql-password').value;
+            
+            textSpan.textContent = 'Testando...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                const success = true; 
+                
+                if (success) {
+                    statusDiv.innerHTML = '<span class="status-success">✓ Conexão estabelecida com sucesso!</span>';
+                    sqlConnection = { host, port, database, user, password };
+                } else {
+                    statusDiv.innerHTML = '<span class="status-error">✗ Falha na conexão. Verifique as credenciais.</span>';
+                }
+                
+                textSpan.textContent = 'Testar Conexão';
+                btn.disabled = false;
+                
+                setTimeout(() => {
+                    statusDiv.innerHTML = '';
+                }, 5000);
+            }, 1500);
+        }
+
+        function loadSampleQuery() {
+            const activeTab = document.querySelector('.query-tab.active').dataset.query;
+            const sampleQueries = {
+                vendas: `-- Vendas mensais do último ano
+SELECT 
+    DATE_FORMAT(data_venda, '%Y-%m') as mes,
+    SUM(valor_total) as total_vendas,
+    COUNT(*) as quantidade_vendas
+FROM vendas
+WHERE data_venda >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+GROUP BY DATE_FORMAT(data_venda, '%Y-%m')
+ORDER BY mes;`,
+                clientes: `-- Distribuição de clientes por categoria
+SELECT 
+    categoria,
+    COUNT(*) as total_clientes,
+    AVG(valor_total_compras) as ticket_medio
+FROM clientes
+GROUP BY categoria
+ORDER BY total_clientes DESC;`,
+                estoque: `-- Produtos com estoque baixo
+SELECT 
+    categoria,
+    nome_produto,
+    quantidade_estoque,
+    estoque_minimo
+FROM produtos
+WHERE quantidade_estoque < estoque_minimo
+ORDER BY categoria, quantidade_estoque;`
+            };
+            
+            document.getElementById('sql-query-input').value = sampleQueries[activeTab];
+        }
+
+        function clearQuery() {
+            document.getElementById('sql-query-input').value = '';
+            document.getElementById('query-result').innerHTML = `
+                <div class="result-placeholder">
+                    <span class="result-icon">💡</span>
+                    <p>Execute uma query para ver os resultados aqui</p>
+                </div>
+            `;
+        }
+
+        function executeQuery() {
+            const query = document.getElementById('sql-query-input').value.trim();
+            const resultDiv = document.getElementById('query-result');
+            
+            if (!query) {
+                resultDiv.innerHTML = `
+                    <div class="result-error">
+                        <span class="result-icon">⚠️</span>
+                        <p>Por favor, insira uma query SQL</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (!sqlConnection) {
+                resultDiv.innerHTML = `
+                    <div class="result-error">
+                        <span class="result-icon">⚠️</span>
+                        <p>Conecte-se ao banco de dados primeiro</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            resultDiv.innerHTML = `
+                <div class="result-loading">
+                    <div class="loading-spinner"></div>
+                    <p>Executando query...</p>
+                </div>
+            `;
+            setTimeout(() => {
+                const mockResults = [
+                    { mes: '2024-01', total_vendas: 245000, quantidade_vendas: 156 },
+                    { mes: '2024-02', total_vendas: 198000, quantidade_vendas: 142 },
+                    { mes: '2024-03', total_vendas: 287000, quantidade_vendas: 178 },
+                    { mes: '2024-04', total_vendas: 312000, quantidade_vendas: 195 },
+                    { mes: '2024-05', total_vendas: 265000, quantidade_vendas: 167 },
+                    { mes: '2024-06', total_vendas: 298000, quantidade_vendas: 182 }
+                ];
+                
+                displayQueryResults(mockResults);
+                
+                updateChartsWithSQLData(mockResults);
+            }, 1500);
+        }
+
+        function displayQueryResults(results) {
+            const resultDiv = document.getElementById('query-result');
+            
+            if (!results || results.length === 0) {
+                resultDiv.innerHTML = `
+                    <div class="result-empty">
+                        <span class="result-icon">📭</span>
+                        <p>Nenhum resultado encontrado</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const columns = Object.keys(results[0]);
+            let tableHTML = `
+                <div class="result-success">
+                    <div class="result-header">
+                        <span class="result-icon">✓</span>
+                        <span>Query executada com sucesso - ${results.length} registro(s) encontrado(s)</span>
+                    </div>
+                    <div class="result-table-container">
+                        <table class="result-table">
+                            <thead>
+                                <tr>
+                                    ${columns.map(col => `<th>${col}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${results.map(row => `
+                                    <tr>
+                                        ${columns.map(col => `<td>${row[col]}</td>`).join('')}
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            resultDiv.innerHTML = tableHTML;
+        }
+
+        function updateChartsWithSQLData(data) {
+            const activeSection = document.querySelector('.nav-item.active').dataset.section;
+            
+            if (activeSection === 'vendas' && data.length > 0) {
+                const labels = data.map(row => row.mes || row.data || row.periodo);
+                const values = data.map(row => row.total_vendas || row.valor || row.total);
+                
+                currentCharts.forEach(chart => chart.destroy());
+                currentCharts = [];
+                
+                const container = document.getElementById('charts-container');
+                container.innerHTML = `
+                    <div class="chart-card">
+                        <h3 class="chart-title">Dados da Consulta SQL</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="sqlChart"></canvas>
+                        </div>
+                    </div>
+                `;
+                
+                const ctx = document.getElementById('sqlChart').getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Valores',
+                            data: values,
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: {
+                                    color: 'rgba(255, 255, 255, 0.9)',
+                                    font: {
+                                        family: 'Poppins',
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                borderColor: 'rgba(255, 255, 255, 0.2)',
+                                borderWidth: 1,
+                                padding: 12
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    font: {
+                                        family: 'Poppins'
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.05)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    font: {
+                                        family: 'Poppins'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                currentCharts.push(chart);
+            }
+        }
+        function toggleSettings() {
+            const panel = document.getElementById('settings-panel');
+            const overlay = document.getElementById('settings-overlay');
+            const notificationsPanel = document.getElementById('notifications-panel');
+            const notificationsOverlay = document.getElementById('notifications-overlay');
+            
+            notificationsPanel.classList.remove('active');
+            notificationsOverlay.classList.remove('active');
+            
+            panel.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function closeSettings() {
+            const panel = document.getElementById('settings-panel');
+            const overlay = document.getElementById('settings-overlay');
+            panel.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        function saveSettings() {
+            if (sqlConnection) {
+                localStorage.setItem('sqlConnection', JSON.stringify(sqlConnection));
+            }
+            
+            alert('Configurações salvas com sucesso!');
+            closeSettings();
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    switchSection(item.dataset.section);
+                });
+            });
+            
+            document.querySelectorAll('.query-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.query-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                });
+            });
+            
+            switchSection('vendas');
+            const savedConnection = localStorage.getItem('sqlConnection');
+            if (savedConnection) {
+                sqlConnection = JSON.parse(savedConnection);
+                const conn = sqlConnection;
+                document.getElementById('sql-host').value = conn.host;
+                document.getElementById('sql-port').value = conn.port;
+                document.getElementById('sql-database').value = conn.database;
+                document.getElementById('sql-user').value = conn.user;
+            }
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeNotifications();
+                    closeSettings();
+                    if (sqlModeEnabled) {
+                        closeSQLEditor();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
