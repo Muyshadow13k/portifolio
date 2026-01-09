@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotbar Navigation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Texto acima do hotbar -->
+    <div class="text-section">
+        <h1>Bem-vindo ao Meu Site</h1>
+        <p>Este é um texto de exemplo acima da barra de navegação</p>
+    </div>
+
+    <!-- Hotbar de navegação -->
+    <div class="hotbar">
+        <nav>
+            <ul>
+                <li><a href="#home" class="active">🏠 Início</a></li>
+                <li><a href="#about">👤 Sobre</a></li>
+                <li><a href="#services">⚙️ Serviços</a></li>
+                <li><a href="#portfolio">💼 Portfólio</a></li>
+                <li><a href="#contact">📧 Contato</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <section id="home" class="page-section">
+        <div class="section-content">
+            <h2>🏠 Início</h2>
+            <p>Bem-vindo à página inicial! Aqui você encontra uma visão geral do nosso site.</p>
+            <p>Navegue pelas seções usando o menu acima para conhecer mais sobre nossos serviços e trabalhos.</p>
+        </div>
+    </section>
+
+    <section id="about" class="page-section">
+        <div class="section-content">
+            <h2>👤 Sobre</h2>
+            <p>Somos uma equipe dedicada a criar experiências digitais incríveis.</p>
+            <p>Com anos de experiência no mercado, oferecemos soluções personalizadas para cada cliente.</p>
+            <ul class="feature-list">
+                <li>✓ Equipe experiente e qualificada</li>
+                <li>✓ Projetos personalizados</li>
+                <li>✓ Suporte contínuo</li>
+                <li>✓ Tecnologias modernas</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="services" class="page-section">
+        <div class="section-content">
+            <h2>⚙️ Serviços</h2>
+            <p>Oferecemos uma ampla gama de serviços para atender suas necessidades:</p>
+            <div class="services-grid">
+                <div class="service-card">
+                    <h3>💻 Desenvolvimento Web</h3>
+                    <p>Sites responsivos e modernos</p>
+                </div>
+                <div class="service-card">
+                    <h3>📱 Apps Mobile</h3>
+                    <p>Aplicativos para iOS e Android</p>
+                </div>
+                <div class="service-card">
+                    <h3>🎨 Design UI/UX</h3>
+                    <p>Interfaces intuitivas e atraentes</p>
+                </div>
+                <div class="service-card">
+                    <h3>🚀 Consultoria</h3>
+                    <p>Estratégias digitais eficazes</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="portfolio" class="page-section">
+        <div class="section-content">
+            <h2>💼 Portfólio</h2>
+            <p>Confira alguns dos nossos projetos recentes:</p>
+            <div class="portfolio-grid">
+                <div class="portfolio-item">
+                    <h3>Projeto 1</h3>
+                    <p>E-commerce completo com sistema de pagamento integrado</p>
+                </div>
+                <div class="portfolio-item">
+                    <h3>Projeto 2</h3>
+                    <p>Aplicativo mobile para gestão de tarefas</p>
+                </div>
+                <div class="portfolio-item">
+                    <h3>Projeto 3</h3>
+                    <p>Website institucional com CMS personalizado</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="page-section">
+        <div class="section-content">
+            <h2>📧 Contato</h2>
+            <p>Entre em contato conosco para discutir seu projeto:</p>
+            <div class="contact-info">
+                <p>📧 Email: contato@exemplo.com</p>
+                <p>📱 Telefone: (11) 9999-9999</p>
+                <p>📍 Endereço: São Paulo, Brasil</p>
+            </div>
+            <form class="contact-form">
+                <input type="text" placeholder="Seu nome" required>
+                <input type="email" placeholder="Seu email" required>
+                <textarea placeholder="Sua mensagem" rows="5" required></textarea>
+                <button type="submit">Enviar Mensagem</button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="text-section">
+        <h1>Obrigado pela visita!</h1>
+        <p>© 2024 - Todos os direitos reservados</p>
+    </footer>
+    <script>
+        let timer;
+        window.addEventListener('scroll', () => {
+            document.body.classList.add("blur");
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                document.body.classList.remove("blur");
+            }, 150);
+        });
+    </script>
+</body>
+</html>
